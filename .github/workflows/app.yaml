@@ -1,0 +1,25 @@
+name: App CICD Workflow
+
+on: workflow_dispatch
+
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "17.x"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.0.5"
+          channel: "stable"
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build apk
+      - name: Push APK to Releases
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          files: |
+            "build/app/outputs/apk/release/*.apk"
