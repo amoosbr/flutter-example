@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   push:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build-android:
     name: Build Android
@@ -14,16 +18,38 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: "17"
+      - name: Setup Android SDK
+        if: ${{ env.ACT }}
+        uses: android-actions/setup-android@v2
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.0.5"
           channel: "stable"
       - run: flutter pub get
       - run: flutter test
-      - run: flutter build apk
+      - run: flutter build appbundle
       - name: Push APK to Releases
         uses: softprops/action-gh-release@v0.1.14
+        if: ${{ !env.ACT }}
         with:
           tag_name: "dev"
           files: |
             "build/app/outputs/apk/release/*.apk"
+            "build/app/outputs/flutter-apk/*.apk"
+            "build/app/outputs/bundle/release/*.aab"
+      - name: Install AppCenter CLI
+        run: |
+          npm install --location=global appcenter-cli
+          appcenter telemetry off
+      - name: Distribute to AppCenter
+        env:
+          APPCENTER_ACCESS_TOKEN: ${{ secrets.APPCENTER_ACCESS_TOKEN }}
+        run: |
+          appcenter distribute release \
+            --group "Internal" \
+            --file 'build/app/outputs/bundle/release/app-release.aab' \
+            --release-notes 'New GH Actions release' \
+            --app bosch-adme/Flutter-Test-1 \
+            --token $APP_CENTER_TOKEN \
+            --silent \
+            --quiet
