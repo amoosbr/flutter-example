@@ -1,6 +1,8 @@
 name: App CICD Workflow
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
 
 jobs:
   build-android:
@@ -22,5 +24,6 @@ jobs:
       - name: Push APK to Releases
         uses: softprops/action-gh-release@v0.1.14
         with:
+          tag_name: "dev"
           files: |
             "build/app/outputs/apk/release/*.apk"
