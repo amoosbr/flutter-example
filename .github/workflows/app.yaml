@@ -74,6 +74,9 @@ jobs:
       #          cache-key: 'flutter-:os:-:channel:-:version:'
       #          cache-path: '${{ runner.tool_cache }}/flutter/:os:-:channel:-:version:'
       - run: flutter pub get
+      - run: |
+          cd ios
+          pod install
       - run: flutter build ios --no-codesign --release
 #      - name: Push APK to Releases
 #        uses: softprops/action-gh-release@v0.1.14
