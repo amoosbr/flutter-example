@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: "17"
       - name: Setup Android SDK
         if: ${{ env.ACT }}
@@ -37,9 +37,9 @@ jobs:
         with:
           tag_name: "dev"
           files: |
-            "build/app/outputs/apk/release/*.apk"
-            "build/app/outputs/flutter-apk/*.apk"
-            "build/app/outputs/bundle/release/*.aab"
+            build/app/outputs/apk/release/*.apk
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
       - name: Install AppCenter CLI
         run: |
           npm install --location=global appcenter-cli
@@ -64,7 +64,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: "17"
       #      - name: Set Ruby Version
       #          uses: ruby/setup-ruby@v1
@@ -92,20 +92,20 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/apple_certificate.p12
           PROVISION_PROFILE_PATH=$RUNNER_TEMP/app_profile.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          
+
           # decode certificates, profiles from secrets to local files
           echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
           echo -n "$APP_PROVISION_PROFILE_BASE64" | base64 --decode --output $PROVISION_PROFILE_PATH
-          
+
           # create temporary signing keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
+
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$APPLE_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
-          
+
           # apply app provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PROVISION_PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles
@@ -126,20 +126,20 @@ jobs:
         with:
           tag_name: "dev"
           files: |
-            "build/ios/ipa/*.ipa"
-#      - name: Install AppCenter CLI
-#        run: |
-#          npm install --location=global appcenter-cli
-#          appcenter telemetry off
-#      - name: Distribute to AppCenter
-#        env:
-#          APPCENTER_ACCESS_TOKEN: ${{ secrets.APPCENTER_ACCESS_TOKEN }}
-#        run: |
-#          appcenter distribute release \
-#            --group "Internal" \
-#            --file 'build/ios/ipa/my_app.ipa' \
-#            --release-notes 'New GH Actions release' \
-#            --app bosch-adme/Flutter-Test \
-#            --token $APP_CENTER_TOKEN \
-#            --silent \
-#            --quiet
+            build/ios/ipa/*.ipa
+      - name: Install AppCenter CLI
+        run: |
+          npm install --location=global appcenter-cli
+          appcenter telemetry off
+      - name: Distribute to AppCenter
+        env:
+          APPCENTER_ACCESS_TOKEN: ${{ secrets.APPCENTER_ACCESS_TOKEN }}
+        run: |
+          appcenter distribute release \
+            --group "Internal" \
+            --file 'build/ios/ipa/my_app.ipa' \
+            --release-notes 'New GH Actions release' \
+            --app bosch-adme/Flutter-Test \
+            --token $APP_CENTER_TOKEN \
+            --silent \
+            --quiet
